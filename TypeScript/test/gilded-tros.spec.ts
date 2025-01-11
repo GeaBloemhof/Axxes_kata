@@ -56,13 +56,13 @@ describe('GildedTrosTest: updateQuality', () => {
 
   describe('Specific items', () => {
     it('Good Wine increases in quality', () => {
-      const maxQuality = 50;
-      const items: Item[] = [new Item('Good Wine', 20, maxQuality)];
+      const startingQuality = 20;
+      const items: Item[] = [new Item('Good Wine', 20, startingQuality)];
       const app: GildedTros = new GildedTros(items);
 
       app.updateQuality();
 
-      expect(app.items[0].quality).toEqual(maxQuality);
+      expect(app.items[0].quality).toEqual(startingQuality + 1);
     });
     it('B-DAWG Keychain does not change in quality', () => {
       const fixedQuality = 80;
