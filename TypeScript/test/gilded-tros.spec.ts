@@ -54,5 +54,71 @@ describe('GildedTrosTest: updateQuality', () => {
     });
   });
 
-  describe('Boundary requirements', () => {});
+  describe('Specific items', () => {
+    it('Good Wine increases in quality', () => {
+      const maxQuality = 50;
+      const items: Item[] = [new Item('Good Wine', 20, maxQuality)];
+      const app: GildedTros = new GildedTros(items);
+
+      app.updateQuality();
+
+      expect(app.items[0].quality).toEqual(maxQuality);
+    });
+    it('B-DAWG Keychain does not change in quality', () => {
+      const fixedQuality = 80;
+      const items: Item[] = [new Item('B-DAWG Keychain', 20, fixedQuality)];
+      const app: GildedTros = new GildedTros(items);
+
+      app.updateQuality();
+
+      expect(app.items[0].quality).toEqual(fixedQuality);
+    });
+    describe('Backstate passes', () => {
+      const startingQuality = 20;
+      const startingSellIn = 11;
+      const items: Item[] = [
+        new Item('Backstage passes for Re:Factor', startingSellIn, startingQuality),
+        new Item('Backstage passes for HAXX', startingSellIn, startingQuality),
+      ];
+      it('increases in quality by 1 when > 10 days are left', () => {
+        const app: GildedTros = new GildedTros(items);
+
+        app.updateQuality();
+
+        app.items.forEach((item: Item) => expect(item.quality).toEqual(startingQuality + 1));
+      });
+      it('increases in quality by 2 when <= 10 days > 5 days are left', () => {
+        const startDay = 10;
+        const endDay = 5;
+        const newItems = items.map((item: Item) => ({ ...item, sellIn: 10, quality: 20 }));
+        const app: GildedTros = new GildedTros(newItems);
+
+        for (let i = startDay; i > endDay; i--) {
+          app.updateQuality();
+
+          app.items.forEach((item: Item) => expect(item.quality).toEqual(startingQuality + (startDay + 1 - i) * 2));
+        }
+      });
+      it('increases in quality by 3 when <= 5 days are left', () => {
+        const startDay = 5;
+        const endDay = 0;
+        const newItems = items.map((item: Item) => ({ ...item, sellIn: 5, quality: 20 }));
+        const app: GildedTros = new GildedTros(newItems);
+
+        for (let i = startDay; i > endDay; i--) {
+          app.updateQuality();
+
+          app.items.forEach((item: Item) => expect(item.quality).toEqual(startingQuality + (startDay + 1 - i) * 3));
+        }
+      });
+      it('drops to 0 quality when < 0 days are left', () => {
+        const newItems = items.map((item: Item) => ({ ...item, sellIn: -1, quality: 20 }));
+        const app: GildedTros = new GildedTros(newItems);
+
+        app.updateQuality();
+
+        app.items.forEach((item: Item) => expect(item.quality).toEqual(0));
+      });
+    });
+  });
 });
