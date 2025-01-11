@@ -1,63 +1,74 @@
-import {Item} from './item';
+import { Item } from './item';
 
 export class GildedTros {
+  private readonly MAX_QUALITY = 50;
+  private readonly MIN_QUALITY = 0;
+  private readonly BP_BOUNDARY_TOP = 10;
+  private readonly BP_BOUNDARY_BOTTOM = 5;
+  private readonly SELL_IN_BOUNDARY = 0;
 
-    constructor(public items: Array<Item>) {
+  private readonly INCREASE_WHEN_AGING = ['Good Wine'];
+  private readonly LEGENDARY_ITEMS = ['B-DAWG Keychain'];
+  private readonly BACKSTAGE_PASSES = ['Backstage passes for Re:Factor', 'Backstage passes for HAXX'];
 
-    }
+  constructor(public items: Array<Item>) {}
 
-    public updateQuality(): void {
-        for (let i = 0; i < this.items.length; i++) {
-            if (this.items[i].name != 'Good Wine' && this.items[i].name != 'Backstage passes for Re:Factor'
-                && this.items[i].name != 'Backstage passes for HAXX') {
-                if (this.items[i].quality > 0) {
-                    if (this.items[i].name != 'B-DAWG Keychain') {
-                        this.items[i].quality = this.items[i].quality - 1;
-                    }
-                }
-            } else {
-                if (this.items[i].quality < 50) {
-                    this.items[i].quality = this.items[i].quality + 1;
+  public updateQuality(): void {
+    let qualityChange: number = -1;
 
-                    if (this.items[i].name == 'Backstage passes for Re:Factor' || this.items[i].name == 'Backstage passes for HAXX') {
-                        if (this.items[i].sellIn < 11) {
-                            if (this.items[i].quality < 50) {
-                                this.items[i].quality = this.items[i].quality + 1;
-                            }
-                        }
+    this.items.forEach((item: Item) => {
+      // min and max boundaries
+      if (this.isEqualToMin(item.quality) || this.isEqualToMax(item.quality)) {
+        this.updateItem(item, 0);
+        return;
+      }
 
-                        if (this.items[i].sellIn < 6) {
-                            if (this.items[i].quality < 50) {
-                                this.items[i].quality = this.items[i].quality + 1;
-                            }
-                        }
-                    }
-                }
-            }
+      // check special items
+      if (this.INCREASE_WHEN_AGING.includes(item.name)) {
+        this.updateItem(item, 1);
+        return;
+      }
 
-            if (this.items[i].name != 'B-DAWG Keychain') {
-                this.items[i].sellIn = this.items[i].sellIn - 1;
-            }
+      if (this.LEGENDARY_ITEMS.includes(item.name)) {
+        this.updateItem(item, 0);
+        return;
+      }
 
-            if (this.items[i].sellIn < 0) {
-                if (this.items[i].name != 'Good Wine') {
-                    if (this.items[i].name != 'Backstage passes for Re:Factor' && this.items[i].name != 'Backstage passes for HAXX') {
-                        if (this.items[i].quality > 0) {
-                            if (this.items[i].name != 'B-DAWG Keychain') {
-                                this.items[i].quality = this.items[i].quality - 1;
-                            }
-                        }
-                    } else {
-                        this.items[i].quality = this.items[i].quality - this.items[i].quality;
-                    }
-                } else {
-                    if (this.items[i].quality < 50) {
-                        this.items[i].quality = this.items[i].quality + 1;
-                    }
-                }
-            }
+      if (this.BACKSTAGE_PASSES.includes(item.name)) {
+        qualityChange = 1;
+
+        if (item.sellIn > this.BP_BOUNDARY_BOTTOM && item.sellIn <= this.BP_BOUNDARY_TOP) {
+          this.updateItem(item, 2);
+          return;
         }
-    }
+        if (item.sellIn > this.SELL_IN_BOUNDARY && item.sellIn <= this.BP_BOUNDARY_BOTTOM) {
+          this.updateItem(item, 3);
+          return;
+        }
+        if (item.sellIn < this.SELL_IN_BOUNDARY) {
+          this.updateItem(item, -item.quality);
+          return;
+        }
+      }
 
+      // end of special items
+
+      // increased degrading when reaching 0 for sellIn
+      if (this.shouldBeSold(item.sellIn)) {
+        this.updateItem(item, -2);
+        return;
+      }
+
+      this.updateItem(item, qualityChange);
+    });
+  }
+
+  private readonly isEqualToMin = (quality: number): boolean => quality === this.MIN_QUALITY;
+  private readonly isEqualToMax = (quality: number): boolean => quality === this.MAX_QUALITY;
+  private readonly shouldBeSold = (sellIn: number): boolean => sellIn === this.SELL_IN_BOUNDARY;
+
+  private updateItem(item: Item, qualityChange: number) {
+    item.quality = item.quality + qualityChange;
+    item.sellIn--;
+  }
 }
-
