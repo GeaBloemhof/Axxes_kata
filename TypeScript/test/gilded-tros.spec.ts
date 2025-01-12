@@ -42,9 +42,9 @@ describe('GildedTrosTest: updateQuality', () => {
 
       expect(app.items[0].quality).toEqual(maxQuality);
     });
-    it('degrades quality twice as fast when sellIn has reached 0', () => {
+    it('degrades quality twice as fast when sellIn has reached < 0', () => {
       const startingQuality = 10;
-      const startingSellIn = 0;
+      const startingSellIn = -1;
       const items: Item[] = [new Item('foo', startingSellIn, startingQuality)];
       const app: GildedTros = new GildedTros(items);
 
@@ -72,6 +72,34 @@ describe('GildedTrosTest: updateQuality', () => {
       app.updateQuality();
 
       expect(app.items[0].quality).toEqual(fixedQuality);
+    });
+    describe('Smelly items', () => {
+      it('decreases quality twice as fast (> 0 sellIn)', () => {
+        const startingQuality = 20;
+        const items: Item[] = [
+          new Item('Duplicate Code', 10, startingQuality),
+          new Item('Long Methods', 10, startingQuality),
+          new Item('Ugly Variable Names', 10, startingQuality),
+        ];
+        const app: GildedTros = new GildedTros(items);
+
+        app.updateQuality();
+
+        app.items.forEach((item: Item) => expect(item.quality).toEqual(startingQuality - 2));
+      });
+      it('decreases quality twice as fast (< 0 sellIn)', () => {
+        const startingQuality = 20;
+        const items: Item[] = [
+          new Item('Duplicate Code', -1, startingQuality),
+          new Item('Long Methods', -1, startingQuality),
+          new Item('Ugly Variable Names', -1, startingQuality),
+        ];
+        const app: GildedTros = new GildedTros(items);
+
+        app.updateQuality();
+
+        app.items.forEach((item: Item) => expect(item.quality).toEqual(startingQuality - 2 * 2));
+      });
     });
     describe('Backstate passes', () => {
       const startingQuality = 20;
