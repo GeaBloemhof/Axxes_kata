@@ -73,6 +73,32 @@ describe('GildedTrosTest: updateQuality', () => {
 
       expect(app.items[0].quality).toEqual(fixedQuality);
     });
+    it('decreases quality twice as fast for Smelly Items (> 0 sellIn)', () => {
+      const startingQuality = 20;
+      const items: Item[] = [
+        new Item('Duplicate Code', 10, startingQuality),
+        new Item('Long Methods', 10, startingQuality),
+        new Item('Ugly Variable Names', 10, startingQuality),
+      ];
+      const app: GildedTros = new GildedTros(items);
+
+      app.updateQuality();
+
+      app.items.forEach((item: Item) => expect(item.quality).toEqual(startingQuality - 2));
+    });
+    it('decreases quality twice as fast for Smelly Items (< 0 sellIn)', () => {
+      const startingQuality = 20;
+      const items: Item[] = [
+        new Item('Duplicate Code', -1, startingQuality),
+        new Item('Long Methods', -1, startingQuality),
+        new Item('Ugly Variable Names', -1, startingQuality),
+      ];
+      const app: GildedTros = new GildedTros(items);
+
+      app.updateQuality();
+
+      app.items.forEach((item: Item) => expect(item.quality).toEqual(startingQuality - 2 * 2));
+    });
     describe('Backstate passes', () => {
       const startingQuality = 20;
       const startingSellIn = 11;
