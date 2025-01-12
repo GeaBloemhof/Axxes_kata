@@ -1,15 +1,15 @@
 import { Item } from './item';
 
 export class GildedTros {
+  private readonly BP_BOUNDARY_BOTTOM = 5;
+  private readonly BP_BOUNDARY_TOP = 10;
   private readonly MAX_QUALITY = 50;
   private readonly MIN_QUALITY = 0;
-  private readonly BP_BOUNDARY_TOP = 10;
-  private readonly BP_BOUNDARY_BOTTOM = 5;
   private readonly SELL_IN_BOUNDARY = 0;
 
-  private readonly INCREASE_WHEN_AGING = ['Good Wine'];
-  private readonly LEGENDARY_ITEMS = ['B-DAWG Keychain'];
   private readonly BACKSTAGE_PASSES = ['Backstage passes for Re:Factor', 'Backstage passes for HAXX'];
+  private readonly INCREASE_WHEN_AGING_ITEMS = ['Good Wine'];
+  private readonly LEGENDARY_ITEMS = ['B-DAWG Keychain'];
   private readonly SMELLY_ITEMS = ['Duplicate Code', 'Long Methods', 'Ugly Variable Names'];
 
   constructor(public items: Array<Item>) {}
@@ -24,14 +24,15 @@ export class GildedTros {
         return;
       }
 
-      // check special items
-      if (this.INCREASE_WHEN_AGING.includes(item.name)) {
-        this.updateItem(item, 1);
-        return;
-      }
+      // special items
 
       if (this.LEGENDARY_ITEMS.includes(item.name)) {
         this.updateItem(item, 0);
+        return;
+      }
+
+      if (this.INCREASE_WHEN_AGING_ITEMS.includes(item.name)) {
+        this.updateItem(item, 1);
         return;
       }
 
@@ -46,6 +47,7 @@ export class GildedTros {
           this.updateItem(item, 3);
           return;
         }
+
         if (item.sellIn < this.SELL_IN_BOUNDARY) {
           this.updateItem(item, -item.quality);
           return;
@@ -60,8 +62,7 @@ export class GildedTros {
 
       // increased degrading when reaching 0 for sellIn
       if (this.shouldBeSold(item.sellIn)) {
-        this.updateItem(item, qualityChange * 2);
-        return;
+        qualityChange = qualityChange * 2;
       }
 
       this.updateItem(item, qualityChange);
