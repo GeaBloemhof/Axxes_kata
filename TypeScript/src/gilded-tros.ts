@@ -10,6 +10,7 @@ export class GildedTros {
   private readonly INCREASE_WHEN_AGING = ['Good Wine'];
   private readonly LEGENDARY_ITEMS = ['B-DAWG Keychain'];
   private readonly BACKSTAGE_PASSES = ['Backstage passes for Re:Factor', 'Backstage passes for HAXX'];
+  private readonly SMELLY_ITEMS = ['Duplicate Code', 'Long Methods', 'Ugly Variable Names'];
 
   constructor(public items: Array<Item>) {}
 
@@ -51,11 +52,15 @@ export class GildedTros {
         }
       }
 
+      if (this.SMELLY_ITEMS.includes(item.name)) {
+        qualityChange = -2;
+      }
+
       // end of special items
 
       // increased degrading when reaching 0 for sellIn
       if (this.shouldBeSold(item.sellIn)) {
-        this.updateItem(item, -2);
+        this.updateItem(item, qualityChange * 2);
         return;
       }
 
@@ -65,7 +70,7 @@ export class GildedTros {
 
   private readonly isEqualToMin = (quality: number): boolean => quality === this.MIN_QUALITY;
   private readonly isEqualToMax = (quality: number): boolean => quality === this.MAX_QUALITY;
-  private readonly shouldBeSold = (sellIn: number): boolean => sellIn === this.SELL_IN_BOUNDARY;
+  private readonly shouldBeSold = (sellIn: number): boolean => sellIn < this.SELL_IN_BOUNDARY;
 
   private updateItem(item: Item, qualityChange: number) {
     item.quality = item.quality + qualityChange;
