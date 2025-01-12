@@ -26,21 +26,25 @@ describe('GildedTrosTest: updateQuality', () => {
   describe('Boundary requirements', () => {
     it('does not reduce quality below 0', () => {
       const minQuality = 0;
-      const items: Item[] = [new Item('foo', 20, minQuality)];
+      const degradingQuality = 1;
+      const items: Item[] = [new Item('foo', 20, minQuality), new Item('bar', -1, degradingQuality)];
       const app: GildedTros = new GildedTros(items);
 
       app.updateQuality();
 
       expect(app.items[0].quality).toEqual(minQuality);
+      expect(app.items[1].quality).toEqual(0);
     });
     it('does not increase quality above 50', () => {
       const maxQuality = 50;
-      const items: Item[] = [new Item('Good Wine', 20, maxQuality)];
+      const increasingQuality = 49;
+      const items: Item[] = [new Item('Good Wine', 20, maxQuality), new Item('Backstage passes for Re:Factor', 6, increasingQuality)];
       const app: GildedTros = new GildedTros(items);
 
       app.updateQuality();
 
       expect(app.items[0].quality).toEqual(maxQuality);
+      expect(app.items[1].quality).toEqual(maxQuality);
     });
     it('degrades quality twice as fast when sellIn has reached < 0', () => {
       const startingQuality = 10;
@@ -56,13 +60,15 @@ describe('GildedTrosTest: updateQuality', () => {
 
   describe('Specific items', () => {
     it('Good Wine increases in quality', () => {
-      const startingQuality = 20;
-      const items: Item[] = [new Item('Good Wine', 20, startingQuality)];
+      const startingQuality = 0;
+      const startingQualityMax = 50;
+      const items: Item[] = [new Item('Good Wine', 20, startingQuality), new Item('Good Wine', 20, startingQualityMax)];
       const app: GildedTros = new GildedTros(items);
 
       app.updateQuality();
 
       expect(app.items[0].quality).toEqual(startingQuality + 1);
+      expect(app.items[1].quality).toEqual(startingQualityMax);
     });
     it('B-DAWG Keychain does not change in quality', () => {
       const fixedQuality = 80;

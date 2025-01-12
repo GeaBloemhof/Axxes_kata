@@ -4,6 +4,7 @@ export class GildedTros {
   private readonly BP_BOUNDARY_BOTTOM = 5;
   private readonly BP_BOUNDARY_TOP = 10;
   private readonly MAX_QUALITY = 50;
+  private readonly MAX_QUALITY_LEGENDARY = 80;
   private readonly MIN_QUALITY = 0;
   private readonly SELL_IN_BOUNDARY = 0;
 
@@ -18,16 +19,9 @@ export class GildedTros {
     let qualityChange: number = -1;
 
     this.items.forEach((item: Item) => {
-      // min and max boundaries
-      if (this.isEqualToMin(item.quality) || this.isEqualToMax(item.quality)) {
-        this.updateItem(item, 0);
-        return;
-      }
-
       // special items
-
       if (this.LEGENDARY_ITEMS.includes(item.name)) {
-        this.updateItem(item, 0);
+        this.updateItem(item, 0, this.MAX_QUALITY_LEGENDARY);
         return;
       }
 
@@ -57,7 +51,6 @@ export class GildedTros {
       if (this.SMELLY_ITEMS.includes(item.name)) {
         qualityChange = -2;
       }
-
       // end of special items
 
       // increased degrading when reaching 0 for sellIn
@@ -69,12 +62,15 @@ export class GildedTros {
     });
   }
 
-  private readonly isEqualToMin = (quality: number): boolean => quality === this.MIN_QUALITY;
-  private readonly isEqualToMax = (quality: number): boolean => quality === this.MAX_QUALITY;
   private readonly shouldBeSold = (sellIn: number): boolean => sellIn < this.SELL_IN_BOUNDARY;
 
-  private updateItem(item: Item, qualityChange: number) {
-    item.quality = item.quality + qualityChange;
+  private updateItem(item: Item, qualityChange: number, maxQuality = this.MAX_QUALITY) {
     item.sellIn--;
+
+    let newQuality = item.quality + qualityChange;
+    newQuality = Math.max(newQuality, this.MIN_QUALITY);
+    newQuality = Math.min(newQuality, maxQuality);
+
+    item.quality = newQuality;
   }
 }

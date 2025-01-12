@@ -5,7 +5,7 @@
   "scripts": {
     "build": "tsc",
     "prestart": "npm run build",
-    "start": "node dist/test/text-test-fixture.ts",
+    "start": "node dist/test/text-test-fixture.js",
     "test": "jest",
     "test:watch": "jest --watchAll"
   },
